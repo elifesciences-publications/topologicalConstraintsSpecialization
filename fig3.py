@@ -1,3 +1,11 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Sep 10 15:32:32 2019
+
+@author: dyanni3
+"""
+
+#%%
 import numpy as np
 from matplotlib import pyplot as plt
     
@@ -116,7 +124,7 @@ np.savetxt('hmap_neighb.txt',hmap_neighb)
 #%%
 alphas = np.linspace(0.01,2,200)
 betas = np.linspace(0.01,1,100)
-fig,axes = plt.subplots(ncols=2,figsize=(20,10))
+fig,axes = plt.subplots(nrows=2,figsize=(20,10))
 axes[0].imshow(hmap_neighb, origin='lower', cmap=plt.cm.magma)
 axes[0].plot(100*alphas[:100],100*3/((4)*alphas[:100]),'cadetblue',lw=3)
 axes[0].plot(100*alphas[100:],100*(6-np.sqrt(5)*alphas[100:])/(5*alphas[100:]),'cadetblue',lw=3)
@@ -135,3 +143,7 @@ axes[1].set_yticks(np.arange(101)[::20])
 axes[1].set_yticklabels(list(np.round(betas[::20]-.01,3))+[1.0],rotation='vertical')
 axes[0].set_yticks(np.arange(101)[::20])
 axes[0].set_yticklabels(list(np.round(betas[::20]-.01,3))+[1.0],rotation='vertical')
+axes[0].set_xlabel("Return on Investment Exponent",fontsize=18)
+axes[1].set_xlabel("Return on Investment Exponent",fontsize=18)
+axes[0].set_ylabel("Interaction Strength",fontsize=18)
+axes[1].set_ylabel("Interaction Strength",fontsize=18)
