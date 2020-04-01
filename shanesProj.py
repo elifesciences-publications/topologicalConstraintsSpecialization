@@ -10,6 +10,7 @@ import numpy as np
 from scipy.linalg import circulant
 from scipy.optimize import minimize
 from matplotlib import pyplot as plt
+from matplotlib import collections  as mc
 
 #%%
 def build_c(beta, N, mode = 'bipartite'):
@@ -70,7 +71,7 @@ def spec_optimized(beta=1, N=10, mode='bipartite', alpha=1, max_iter = 100):
         pass
     spec = np.average([2*(max([vi, (1-vi)])-.5) for vi in v])
     #spec = np.average(v)
-    return(spec,best)
+    return(spec,best,v)
     
 #%% parameter sweep
 def make_plot(mode='bipartite'):
@@ -105,3 +106,38 @@ def gradient_descent(eps, v0, beta=1, N=10, mode='bipartite', alpha=1, max_iter 
     
 def spec(v):
     return(np.average([2*(max([vi, (1-vi)])-.5) for vi in v]))
+
+def make_network_for_plotting(N=10, mode='bipartite'):
+    theta_step = 2*np.pi/(N)
+    thetas = [theta_step*i for i in range(N)]
+    pts = []
+    for theta in thetas:
+        pts.append( (np.cos(theta), np.sin(theta)) )
+
+    lines = []
+    for i,pt in enumerate(pts):
+        for j,opt in enumerate(pts):
+            if mode == 'full':
+                lines.append([pt,opt])
+            elif mode =='bipartite':
+                if ((i+j)%2==0):
+                    lines.append([pt, opt])
+            elif mode == 'neighbor':
+                if (j==(i+1)%N):
+                    lines.append([pt, opt])
+    return(np.array(pts), lines)
+
+def make_colorized(v, N=10, mode='bipartite'):
+    with plt.style.context('dark_background'):
+        pts, lines = make_network_for_plotting(N=N, mode=mode)
+        fig, ax = plt.subplots(figsize = (10,10))
+        lc = mc.LineCollection(lines, colors='w', linewidths = .5)
+        ax.add_collection(lc)
+        ax.scatter(pts[:,0],pts[:,1],
+            c=[plt.cm.bwr(vi) for vi in v], s=1500, edgecolor='w')
+        ax.autoscale()
+        fig2,ax2 = plt.subplots()
+        cb = ax2.imshow(np.stack([np.linspace(min(v), max(v), 50) for i in range(6)]).T,
+            cmap=plt.cm.bwr)
+        fig2.colorbar(cb, ax=ax2)
+        return(fig,fig2)
