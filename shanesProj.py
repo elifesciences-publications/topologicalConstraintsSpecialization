@@ -50,6 +50,10 @@ def spec(v):
         
 def W(v,c, alpha):
     return(np.sum(((v**alpha)@c)*((1-v)**alpha), axis=v.ndim-1))
+
+def W_limited(v, c, alpha, limit):
+    limited = np.clip((v**alpha)@c, 0, limit)
+    return(np.sum(limited*((1-v)**alpha), axis=v.ndim-1))
     
 def grad_W(v,c, alpha):
     left1 = alpha*(v**(alpha-1))
