@@ -36,6 +36,17 @@ def build_c(beta, N, mode = 'bipartite'):
         t1 = beta*(A*np.outer(1/np.dot(one,A),one))
         t2 = (1-beta)*np.eye(N)
         return(t1+t2)
+    if mode == 'star':
+        A = np.eye(N)
+        A[:,0] = np.ones(N)
+        A[0,:] = np.ones(N)
+        one = np.ones(N)
+        t1 = beta*(A*np.outer(1/np.dot(one,A),one))
+        t2 = (1-beta)*np.eye(N)
+        return(t1+t2)
+
+def spec(v):
+    return(2*np.average(np.abs(v-.5)))
         
 def W(v,c, alpha):
     return(np.sum(((v**alpha)@c)*((1-v)**alpha), axis=v.ndim-1))
@@ -152,6 +163,19 @@ def evo(pop, c, alpha, nsteps):
         inds = np.random.choice(np.arange(N), p=fits/np.sum(fits),
          replace=True, size=N)
         pop = pop[inds]
-        print(f"ep: {t}, fit: {np.average(fits)}")
+        #print(f"ep: {t}, fit: {np.average(fits)}")
     return(pop)
+
+def make_hmap(mode, nsteps=2000, popsize=10000):
+    alphas = np.linspace(.1,1.5,15)
+    betas = np.linspace(0,1,11)
+    hm = np.zeros((15,11))
+    for i,alpha in enumerate(alphas):
+        for j,beta in enumerate(betas):
+            c = build_c(beta, 10, mode=mode)
+            print(f"alpha: {alpha}, beta: {beta}")
+            pop = np.random.rand(popsize,10)
+            pop = evo(pop, c, alpha, nsteps)
+            hm[i,j] = np.average([spec(v) for v in pop])
+
 
