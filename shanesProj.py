@@ -167,7 +167,7 @@ def evo(pop, c, alpha, nsteps):
     return(pop)
 
 def make_hmap(mode, nsteps=2000, popsize=10000):
-    alphas = np.linspace(.1,1.5,15)
+    alphas = np.linspace(.5,1.5,11)
     betas = np.linspace(0,1,11)
     hm = np.zeros((15,11))
     for i,alpha in enumerate(alphas):
@@ -177,5 +177,6 @@ def make_hmap(mode, nsteps=2000, popsize=10000):
             pop = np.random.rand(popsize,10)
             pop = evo(pop, c, alpha, nsteps)
             hm[i,j] = np.average([spec(v) for v in pop])
+    return(hm)
 
 
