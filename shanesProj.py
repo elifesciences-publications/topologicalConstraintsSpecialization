@@ -23,7 +23,8 @@ def build_c(beta, N, mode = 'bipartite'):
         return(t1+t2)
     if mode=='neighbor':
         l = np.zeros(N)
-        l[:3] = 1
+        l[:2] = 1
+        l[-1] =1
         A = circulant(l)
         one = np.ones(N)
         t1 = beta*(A*np.outer(1/np.dot(one,A),one))
@@ -37,9 +38,7 @@ def build_c(beta, N, mode = 'bipartite'):
         return(t1+t2)
         
 def W(v,c, alpha):
-    right = (1-v)**alpha
-    right = np.dot(c,right)
-    return(-np.dot(v**alpha, right))
+    return(np.sum(((v**alpha)@c)*((1-v)**alpha), axis=v.ndim-1))
     
 def grad_W(v,c, alpha):
     left1 = alpha*(v**(alpha-1))
@@ -141,3 +140,18 @@ def make_colorized(v, N=10, mode='bipartite'):
             cmap=plt.cm.bwr)
         fig2.colorbar(cb, ax=ax2)
         return(fig,fig2)
+
+def evo(pop, c, alpha, nsteps):
+    N = pop.shape[0]
+    for t in range(nsteps):
+        mask = np.random.choice([0,1], p=[.98, .02], size=(N, 10))
+        mut = mask*(.1*(np.random.random((N,10))-.5))
+        pop += mut
+        pop = np.clip(pop,0,1)
+        fits = W(pop, c, alpha)
+        inds = np.random.choice(np.arange(N), p=fits/np.sum(fits),
+         replace=True, size=N)
+        pop = pop[inds]
+        print(f"ep: {t}, fit: {np.average(fits)}")
+    return(pop)
+
