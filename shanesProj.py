@@ -51,6 +51,19 @@ def spec(v):
 def W(v,c, alpha):
     return(np.sum(((v**alpha)@c)*((1-v)**alpha), axis=v.ndim-1))
 
+"""
+Hi David,
+
+First, no worries, next week will be great!
+
+Great point on the equal number confusion. At a minimum, they have missed how general our model is.
+
+I had another idea regarding how to model the 1:2 ratio. What if we cap how much viability a cell can use? Cells can still make up to 1, but now can only use, say 0.3. Any amount they have above that is just wasted. This seems biologically relevant, too (for example, we need vitamin D, but taking supplements with 1000X what we need in a day doesn't make us extra healthy).
+
+Best,
+"""
+
+
 def W_limited(v, c, alpha, limit):
     limited = np.clip((v**alpha)@c, 0, limit)
     return(np.sum(limited*((1-v)**alpha), axis=v.ndim-1))
@@ -148,7 +161,7 @@ def make_colorized(v, N=10, mode='bipartite'):
         lc = mc.LineCollection(lines, colors='w', linewidths = .5)
         ax.add_collection(lc)
         ax.scatter(pts[:,0],pts[:,1],
-            c=[plt.cm.bwr(vi) for vi in v], s=1500, edgecolor='w')
+            c=[plt.cm.bwr(1-vi) for vi in v], s=1500, edgecolor='w')
         ax.autoscale()
         fig2,ax2 = plt.subplots()
         cb = ax2.imshow(np.stack([np.linspace(min(v), max(v), 50) for i in range(6)]).T,
@@ -156,30 +169,33 @@ def make_colorized(v, N=10, mode='bipartite'):
         fig2.colorbar(cb, ax=ax2)
         return(fig,fig2)
 
-def evo(pop, c, alpha, nsteps):
+def evo(pop, c, alpha, nsteps, limited=False):
     N = pop.shape[0]
     for t in range(nsteps):
         mask = np.random.choice([0,1], p=[.98, .02], size=(N, 10))
         mut = mask*(.1*(np.random.random((N,10))-.5))
         pop += mut
         pop = np.clip(pop,0,1)
-        fits = W(pop, c, alpha)
+        if limited==False:
+            fits = W(pop, c, alpha)
+        else:
+            fits = W_limited(pop, c, alpha, limited)
         inds = np.random.choice(np.arange(N), p=fits/np.sum(fits),
          replace=True, size=N)
         pop = pop[inds]
         #print(f"ep: {t}, fit: {np.average(fits)}")
     return(pop)
 
-def make_hmap(mode, nsteps=2000, popsize=10000):
-    alphas = np.linspace(.5,1.5,11)
+def make_hmap(mode, nsteps=2000, popsize=10000, limited=False):
+    alphas = np.linspace(.5,1.0,6)
     betas = np.linspace(0,1,11)
-    hm = np.zeros((15,11))
+    hm = np.zeros((6,11))
     for i,alpha in enumerate(alphas):
         for j,beta in enumerate(betas):
             c = build_c(beta, 10, mode=mode)
             print(f"alpha: {alpha}, beta: {beta}")
             pop = np.random.rand(popsize,10)
-            pop = evo(pop, c, alpha, nsteps)
+            pop = evo(pop, c, alpha, nsteps, limited)
             hm[i,j] = np.average([spec(v) for v in pop])
     return(hm)
 
