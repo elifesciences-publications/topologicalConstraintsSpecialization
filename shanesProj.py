@@ -156,7 +156,7 @@ def make_network_for_plotting(N=10, mode='bipartite'):
             if mode == 'full':
                 lines.append([pt,opt])
             elif mode =='bipartite':
-                if ((i+j)%2==0):
+                if ((i+j)%2==1):
                     lines.append([pt, opt])
             elif mode == 'neighbor':
                 if (j==(i+1)%N):
@@ -170,7 +170,7 @@ def make_colorized(v, N=10, mode='bipartite'):
     lc = mc.LineCollection(lines, colors='k', linewidths = 3.5)
     ax.add_collection(lc)
     ax.scatter(pts[:,0],pts[:,1],
-        c=[plt.cm.bwr(1-vi) for vi in v], s=1500, edgecolor='w')
+        c=[plt.cm.bwr(1-vi) for vi in v], s=1500, edgecolor='k')
     ax.autoscale()
     fig2,ax2 = plt.subplots()
     cb = ax2.imshow(np.stack([np.linspace(min(v), max(v), 50) for i in range(6)]).T,
