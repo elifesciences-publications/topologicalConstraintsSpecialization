@@ -178,6 +178,53 @@ def make_colorized(v, N=10, mode='bipartite'):
     fig2.colorbar(cb, ax=ax2)
     return(fig,fig2)
 
+def make_mean_field_cartoon_networks():
+    home = os.getcwd()
+    pts = [(i,j) for i in range(5) for j in range(5)]
+    lines = []
+    for i in range(5):
+        for j in range(5):
+            for inc in [-1, 0, 1]:
+                lines.append([(i,j),(i,j + inc)]) 
+                lines.append([(i,j),(i + inc ,j)])
+    pts = np.array(pts)
+    color_choices = ['r', 'b']
+    c = [color_choices[i % 2] for i in range(25)] 
+    fig, ax = plt.subplots(figsize = (10,10))
+    lc = mc.LineCollection(lines, colors='k', linewidths = 2)
+    ax.add_collection(lc)
+    ax.scatter(pts[:,0],pts[:,1], c = c, s=1500, edgecolor='k')
+    ax.autoscale()
+    fig.savefig(home+ r'\cartoons\f1Xp5z4.pdf')
+
+    color_choices = ['r', 'b' , 'r']
+    c = [color_choices[i % 3] for i in range(25)] 
+    lc = mc.LineCollection(lines, colors='k', linewidths = 2)
+    fig, ax = plt.subplots(figsize = (10,10))
+    ax.add_collection(lc)
+    ax.scatter(pts[:,0],pts[:,1], c = c, s=1500, edgecolor='k')
+    ax.autoscale()
+    fig.savefig(home + r'\cartoons\fp5Xp66z4.pdf')
+
+    bpts = [(i,j) for i in range(0,10,2) for j in range(-2,3)]
+    rpts = [(i,0) for i in range(1, 11, 2)] 
+    lines = []
+    for i in range(1, 11, 2):
+        for j in range(-2,3):
+            lines.append([(i,0), (i-1,j)])
+            if i!=9:
+                lines.append([(i,0), (i+1,j)])
+    bpts = np.array(bpts)
+    rpts = np.array(rpts)
+    fig, ax = plt.subplots(figsize = (10,10))
+    lc = mc.LineCollection(lines, colors='k', linewidths = 2)
+    ax.add_collection(lc)
+    ax.scatter(bpts[:,0],bpts[:,1], c = 'b', s=1500, edgecolor='k')
+    ax.scatter(rpts[:,0],rpts[:,1], c = 'r', s=1500, edgecolor='k')
+    ax.autoscale()
+    fig.savefig(home + r'\cartoons\f1Xp16z10.pdf')
+
+
 def evo(pop, c, alpha, nsteps, limited=False):
     N = pop.shape[0]
     for t in range(nsteps):
@@ -194,6 +241,36 @@ def evo(pop, c, alpha, nsteps, limited=False):
         pop = pop[inds]
         #print(f"ep: {t}, fit: {np.average(fits)}")
     return(pop)
+
+def make_fig4_ab_data(mode, nsteps, popsize):
+    alphas = np.linspace(.5,1.5,11)
+    c = build_c(1, 10, mode=mode)
+    spec_means = []
+    spec_stds = []
+    for alpha in alphas:
+        print(alpha)
+        pop = np.random.rand(popsize, 10)
+        pop = evo(pop, c, alpha, nsteps, limited=False)
+        spec_means.append(np.average([spec(v) for v in pop]))
+        spec_stds.append(np.std([spec(v) for v in pop]))
+    return(spec_means, spec_stds)
+
+def make_fig4_ab_figure(title, sm, ss):
+    with plt.style.context('seaborn-white'):
+        alphas = np.linspace(.5, 1.5, 11)
+        fig = plt.figure(figsize=(8,6))
+        plt.vlines(1.0, 0, 1, colors='gold', linestyles='dashed', lw=2)
+        plt.errorbar(alphas, sm, yerr=ss, ecolor='k', elinewidth=1.8, capsize=2, marker='o', markersize=10, color='b', lw = 0)
+        plt.xlabel(r'$\alpha$', fontsize=18)
+        plt.ylabel('Specialization', fontsize=18)
+        plt.grid(lw=.2)
+        plt.xticks([round(x, 2) for x in alphas], fontsize=18)
+        plt.yticks(np.arange(1, 11)/10, fontsize=18)
+        plt.ylim(0,1)
+        plt.title(title, fontsize=18)
+
+
+
 
 def make_hmap(mode, nsteps, popsize, limited):
     alphas = np.linspace(.1,1,10)
